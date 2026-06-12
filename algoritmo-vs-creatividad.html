@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Algoritmo vs Creatividad — Investigación Audiovisual</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --purple-50: #EEEDFE; --purple-200: #AFA9EC; --purple-400: #7F77DD;
+    --purple-600: #534AB7; --purple-800: #3C3489; --purple-900: #26215C;
+    --teal-50: #E1F5EE; --teal-200: #5DCAA5; --teal-600: #0F6E56; --teal-800: #085041;
+    --coral-50: #FAECE7; --coral-200: #F0997B; --coral-600: #993C1D; --coral-800: #712B13;
+    --amber-50: #FAEEDA; --amber-200: #EF9F27; --amber-600: #854F0B; --amber-800: #633806;
+    --pink-50: #FBEAF0; --pink-200: #ED93B1; --pink-600: #993556;
+    --blue-50: #E6F1FB; --blue-600: #185FA5;
+    --dark-bg: #0a0a14;
+    --border: rgba(0,0,0,0.1);
+    --text: #1a1a2e;
+    --text-muted: #5a5a7a;
+    --surface: #ffffff;
+    --surface2: #f5f5fb;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f0f0f8;
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+  .page { max-width: 860px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+
+  /* HERO */
+  .hero {
+    background: var(--dark-bg);
+    border-radius: var(--radius);
+    padding: 3rem 2rem 2.5rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-grid {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(83,74,183,0.07) 0px, transparent 1px, transparent 40px),
+      repeating-linear-gradient(90deg, rgba(83,74,183,0.07) 0px, transparent 1px, transparent 40px);
+  }
+  .hero-badge {
+    display: inline-block; background: rgba(83,74,183,0.25); color: #AFA9EC;
+    font-size: 11px; font-weight: 600; padding: 4px 14px; border-radius: 20px;
+    letter-spacing: 0.08em; margin-bottom: 1.2rem; text-transform: uppercase;
+    border: 1px solid var(--purple-600); position: relative;
+  }
+  .hero h1 { font-size: 30px; font-weight: 700; color: #EEEDFE; line-height: 1.2; margin-bottom: 0.4rem; position: relative; }
+  .hero h1 span { color: #AFA9EC; }
+  .hero-tagline { font-size: 13px; color: var(--purple-400); margin-bottom: 1.8rem; position: relative; }
+  .platform-row { display: flex; justify-content: center; gap: 10px; margin-bottom: 2rem; flex-wrap: wrap; position: relative; }
+  .plat-tag { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid; }
+  .plat-tiktok { background: rgba(29,158,117,0.15); color: #5DCAA5; border-color: #1D9E75; }
+  .plat-yt { background: rgba(216,90,48,0.15); color: #F0997B; border-color: #D85A30; }
+  .plat-ig { background: rgba(212,83,126,0.15); color: #ED93B1; border-color: #D4537E; }
+  .author-area { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .author-chip {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: rgba(255,255,255,0.07); border: 1px solid rgba(175,169,236,0.25);
+    border-radius: 24px; padding: 8px 18px;
+  }
+  .author-av {
+    width: 30px; height: 30px; border-radius: 50%; background: var(--purple-600);
+    color: #EEEDFE; font-size: 10px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .author-name { font-size: 14px; font-weight: 600; color: #EEEDFE; }
+  .author-meta { font-size: 11px; color: var(--purple-400); }
+
+  /* EDIT BAR */
+  .edit-bar {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface); border-radius: var(--radius-sm);
+    padding: 10px 16px; margin-bottom: 1.5rem;
+    border: 1px solid var(--border); flex-wrap: wrap;
+  }
+  .edit-bar span { font-size: 13px; color: var(--text-muted); flex: 1; min-width: 120px; }
+  .btn-edit, .btn-save, .btn-cancel {
+    padding: 6px 16px; border-radius: var(--radius-sm); font-size: 13px;
+    font-weight: 500; cursor: pointer; border: 1px solid; transition: all 0.15s;
+  }
+  .btn-edit { background: var(--purple-600); color: white; border-color: var(--purple-600); }
+  .btn-edit:hover { background: var(--purple-800); }
+  .btn-save { background: #1D9E75; color: white; border-color: #1D9E75; display: none; }
+  .btn-save:hover { background: #085041; }
+  .btn-cancel { background: white; color: var(--text-muted); border-color: var(--border); display: none; }
+  .btn-cancel:hover { background: var(--surface2); }
+  .edit-hint { font-size: 12px; color: var(--purple-600); display: none; }
+
+  /* SECTIONS */
+  .section {
+    background: var(--surface); border-radius: var(--radius);
+    border: 1px solid var(--border); margin-bottom: 1rem; overflow: hidden;
+  }
+  .section-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 1rem 1.25rem; cursor: pointer; transition: background 0.15s;
+  }
+  .section-header:hover { background: var(--surface2); }
+  .sec-icon {
+    width: 38px; height: 38px; border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px;
+  }
+  .sec-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 2px; }
+  .sec-title { font-size: 15px; font-weight: 600; color: var(--text); }
+  .chevron { margin-left: auto; font-size: 18px; color: var(--text-muted); transition: transform 0.2s; }
+  .chevron.open { transform: rotate(180deg); }
+  .section-body { padding: 0 1.25rem 1.25rem; border-top: 1px solid var(--border); }
+
+  /* EDITABLE FIELDS */
+  [contenteditable="true"] { outline: none; }
+  .editing [contenteditable="true"] {
+    background: rgba(83,74,183,0.06);
+    border-radius: 4px;
+    outline: 2px dashed rgba(83,74,183,0.35);
+    padding: 2px 4px;
+    cursor: text;
+    min-width: 40px;
+    display: inline-block;
+  }
+  .editing [contenteditable="true"]:focus {
+    outline: 2px solid var(--purple-600);
+    background: rgba(83,74,183,0.1);
+  }
+  .editing-indicator {
+    display: none; font-size: 11px; color: var(--purple-600);
+    background: var(--purple-50); border-radius: 4px; padding: 2px 8px;
+    border: 1px solid var(--purple-200);
+  }
+  .editing .editing-indicator { display: inline-block; }
+
+  /* TREE */
+  .tree-wrap { margin-top: 1.25rem; display: flex; flex-direction: column; align-items: center; gap: 0; }
+  .tree-node {
+    border-radius: var(--radius-sm); padding: 8px 14px;
+    font-size: 12px; font-weight: 500; text-align: center; line-height: 1.4;
+  }
+  .tn-impact { background: var(--coral-50); color: var(--coral-800); border: 1px solid var(--coral-200); }
+  .tn-effect { background: var(--amber-50); color: var(--amber-800); border: 1px solid var(--amber-200); }
+  .tn-central { background: var(--purple-600); color: #EEEDFE; font-size: 13px; font-weight: 600; padding: 12px 22px; max-width: 380px; }
+  .tn-cause { background: var(--teal-50); color: var(--teal-800); border: 1px solid var(--teal-200); }
+  .vline { width: 2px; height: 18px; background: #d0d0e0; }
+  .tree-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .tree-sec-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin: 14px 0 8px; font-weight: 600; align-self: flex-start; }
+
+  /* HYPOTHESIS */
+  .hyp-main {
+    background: var(--surface2); border-left: 3px solid var(--purple-600);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 1rem 1.25rem; margin-top: 1.25rem;
+  }
+  .hyp-label { font-size: 10px; font-weight: 700; color: var(--purple-600); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
+  .hyp-text { font-size: 14px; line-height: 1.7; color: var(--text); font-style: italic; }
+  .hyp-specifics { margin-top: 1rem; display: flex; flex-direction: column; gap: 8px; }
+  .hyp-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 9px 12px; border-radius: var(--radius-sm);
+    background: var(--purple-50); border: 1px solid var(--purple-200);
+  }
+  .hyp-num { font-size: 11px; font-weight: 700; color: var(--purple-600); flex-shrink: 0; margin-top: 2px; }
+  .hyp-itext { font-size: 13px; color: var(--purple-800); line-height: 1.5; }
+
+  /* QUESTION */
+  .q-box {
+    margin-top: 1.25rem; background: var(--dark-bg);
+    border-radius: var(--radius); padding: 1.5rem;
+    display: flex; align-items: flex-start; gap: 14px;
+  }
+  .q-mark { font-size: 40px; font-weight: 700; color: var(--purple-400); line-height: 1; flex-shrink: 0; }
+  .q-text { font-size: 15px; font-weight: 600; color: #EEEDFE; line-height: 1.6; }
+  .q-delim { margin-top: 0.8rem; font-size: 12px; color: var(--purple-400); line-height: 1.6; }
+
+  /* PROSE */
+  .prose { margin-top: 1.25rem; font-size: 14px; line-height: 1.8; color: var(--text); }
+  .prose p + p { margin-top: 0.75rem; }
+
+  /* JUSTIFICATION CARDS */
+  .just-grid { margin-top: 1.25rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+  .just-card { padding: 1rem; border-radius: var(--radius-sm); border: 1px solid; }
+  .just-icon { font-size: 20px; margin-bottom: 8px; }
+  .just-title { font-size: 12px; font-weight: 700; margin-bottom: 5px; }
+  .just-body { font-size: 12px; line-height: 1.5; }
+  .jc1 { background: var(--purple-50); border-color: var(--purple-200); }
+  .jc1 .just-title { color: var(--purple-800); } .jc1 .just-body { color: var(--purple-600); }
+  .jc2 { background: var(--teal-50); border-color: var(--teal-200); }
+  .jc2 .just-title { color: var(--teal-800); } .jc2 .just-body { color: var(--teal-600); }
+  .jc3 { background: var(--amber-50); border-color: var(--amber-200); }
+  .jc3 .just-title { color: var(--amber-800); } .jc3 .just-body { color: var(--amber-600); }
+  .jc4 { background: var(--coral-50); border-color: var(--coral-200); }
+  .jc4 .just-title { color: var(--coral-800); } .jc4 .just-body { color: var(--coral-600); }
+
+  /* OBJECTIVES */
+  .obj-list { margin-top: 1.25rem; display: flex; flex-direction: column; gap: 8px; }
+  .obj-gen {
+    display: flex; gap: 12px; align-items: flex-start;
+    background: var(--purple-600); border-radius: var(--radius-sm); padding: 1rem 1.25rem;
+  }
+  .obj-gen-icon {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: rgba(255,255,255,0.15); display: flex; align-items: center;
+    justify-content: center; font-size: 16px; flex-shrink: 0; color: #EEEDFE;
+  }
+  .obj-gen-label { font-size: 10px; color: #AFA9EC; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 3px; font-weight: 700; }
+  .obj-gen-text { font-size: 13px; color: #EEEDFE; line-height: 1.5; }
+  .obj-esp {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 10px 14px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: var(--surface2);
+  }
+  .obj-num {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--teal-50); color: var(--teal-800); font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    border: 1px solid var(--teal-200);
+  }
+  .obj-esp-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+
+  .info-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 1.25rem; }
+  .info-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 12px; padding: 5px 12px; border-radius: 20px;
+    border: 1px solid var(--border); color: var(--text-muted); background: var(--surface2);
+  }
+
+  /* FOOTER */
+  .footer { text-align: center; margin-top: 2.5rem; font-size: 12px; color: var(--text-muted); }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: #1a1a2e; color: white; padding: 10px 20px; border-radius: 20px;
+    font-size: 13px; font-weight: 500; transition: transform 0.3s ease; z-index: 999;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 600px) {
+    .hero { padding: 2rem 1rem 1.5rem; }
+    .hero h1 { font-size: 22px; }
+    .page { padding: 1rem 0.75rem 3rem; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- EDIT BAR -->
+  <div class="edit-bar">
+    <span>✏️ <strong>Página editable</strong> — haz clic en "Editar" para modificar cualquier texto</span>
+    <span class="editing-indicator">Modo edición activo — haz clic en cualquier texto subrayado para editarlo</span>
+    <button class="btn-edit" onclick="startEdit()">✏️ Editar</button>
+    <button class="btn-save" onclick="saveEdit()">💾 Guardar cambios</button>
+    <button class="btn-cancel" onclick="cancelEdit()">✕ Cancelar</button>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-badge">Investigación audiovisual · 2026-1</div>
+    <h1><span contenteditable="false" class="editable">Algoritmo</span> vs <span contenteditable="false" class="editable">Creatividad</span></h1>
+    <p class="hero-tagline" contenteditable="false" class="editable">¿Quién decide realmente qué crear?</p>
+    <div class="platform-row">
+      <span class="plat-tag plat-tiktok">🎵 TikTok</span>
+      <span class="plat-tag plat-yt">▶ YouTube</span>
+      <span class="plat-tag plat-ig">📷 Instagram</span>
+    </div>
+    <div class="author-area">
+      <div class="author-chip">
+        <div class="author-av">MI</div>
+        <div class="author-name" contenteditable="false" class="editable">María Isabella Villegas Hernández</div>
+      </div>
+      <div class="author-meta" contenteditable="false" class="editable">Docente: Jhon Fredy Vergara · Politécnico Colombiano Jaime Isaza Cadavid</div>
+      <div class="author-meta" contenteditable="false" class="editable">Facultad de Comunicación Audiovisual · Metodología de Investigación · Poblado 2026-1</div>
+    </div>
+  </div>
+
+  <!-- ÁRBOL DE PROBLEMAS -->
+  <div class="section" id="sec1">
+    <div class="section-header" onclick="toggle('sec1')">
+      <div class="sec-icon" style="background:var(--purple-50);">🌳</div>
+      <div>
+        <div class="sec-label" style="color:var(--purple-600);">Sección 1</div>
+        <div class="sec-title">Árbol de problemas</div>
+      </div>
+      <span class="chevron open" id="chev-sec1">▾</span>
+    </div>
+    <div class="section-body" id="body-sec1">
+      <div class="tree-wrap">
+        <div class="tree-sec-label">Impacto</div>
+        <div class="tree-row">
+          <div class="tree-node tn-impact" contenteditable="false" class="editable">Pérdida de identidad creativa</div>
+          <div class="tree-node tn-impact" contenteditable="false" class="editable">Empobrecimiento del lenguaje audiovisual</div>
+          <div class="tree-node tn-impact" contenteditable="false" class="editable">Saturación de contenidos similares</div>
+          <div class="tree-node tn-impact" contenteditable="false" class="editable">Transformación de hábitos de consumo</div>
+        </div>
+        <div class="vline"></div>
+        <div class="tree-sec-label">Consecuencias</div>
+        <div class="tree-row">
+          <div class="tree-node tn-effect" contenteditable="false" class="editable">Estandarización del contenido</div>
+          <div class="tree-node tn-effect" contenteditable="false" class="editable">Reducción de la experimentación</div>
+          <div class="tree-node tn-effect" contenteditable="false" class="editable">Producción acelerada y superficial</div>
+          <div class="tree-node tn-effect" contenteditable="false" class="editable">Dependencia del algoritmo</div>
+          <div class="tree-node tn-effect" contenteditable="false" class="editable">Agotamiento creativo</div>
+        </div>
+        <div class="vline"></div>
+        <div class="tree-node tn-central" contenteditable="false" class="editable">⚡ Influencia de los algoritmos en la reducción de la creatividad y la calidad del contenido audiovisual</div>
+        <div class="vline"></div>
+        <div class="tree-sec-label">Causas directas</div>
+        <div class="tree-row">
+          <div class="tree-node tn-cause" contenteditable="false" class="editable">Predominio de métricas digitales</div>
+          <div class="tree-node tn-cause" contenteditable="false" class="editable">Presión por visibilidad y monetización</div>
+          <div class="tree-node tn-cause" contenteditable="false" class="editable">Desconocimiento del algoritmo</div>
+          <div class="tree-node tn-cause" contenteditable="false" class="editable">Economía de la atención</div>
+          <div class="tree-node tn-cause" contenteditable="false" class="editable">Reproducción de tendencias virales</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HIPÓTESIS -->
+  <div class="section" id="sec2">
+    <div class="section-header" onclick="toggle('sec2')">
+      <div class="sec-icon" style="background:var(--amber-50);">💡</div>
+      <div>
+        <div class="sec-label" style="color:var(--amber-600);">Sección 2</div>
+        <div class="sec-title">Hipótesis</div>
+      </div>
+      <span class="chevron open" id="chev-sec2">▾</span>
+    </div>
+    <div class="section-body" id="body-sec2">
+      <div class="hyp-main">
+        <div class="hyp-label">Hipótesis general</div>
+        <div class="hyp-text" contenteditable="false" class="editable">Los algoritmos de TikTok, YouTube e Instagram influyen significativamente en la producción audiovisual, promoviendo contenidos estandarizados en detrimento de la creatividad.</div>
+      </div>
+      <div class="hyp-specifics">
+        <div class="hyp-item">
+          <div class="hyp-num">H1</div>
+          <div class="hyp-itext" contenteditable="false" class="editable">A mayor dependencia de métricas digitales, menor diversidad creativa en los contenidos.</div>
+        </div>
+        <div class="hyp-item">
+          <div class="hyp-num">H2</div>
+          <div class="hyp-itext" contenteditable="false" class="editable">El desconocimiento del funcionamiento del algoritmo incrementa la reproducción de tendencias virales.</div>
+        </div>
+        <div class="hyp-item">
+          <div class="hyp-num">H3</div>
+          <div class="hyp-itext" contenteditable="false" class="editable">Las dinámicas de viralidad favorecen la producción de contenidos rápidos y superficiales sobre propuestas narrativas elaboradas.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PREGUNTA -->
+  <div class="section" id="sec3">
+    <div class="section-header" onclick="toggle('sec3')">
+      <div class="sec-icon" style="background:var(--teal-50);">❓</div>
+      <div>
+        <div class="sec-label" style="color:var(--teal-600);">Sección 3</div>
+        <div class="sec-title">Pregunta de investigación</div>
+      </div>
+      <span class="chevron open" id="chev-sec3">▾</span>
+    </div>
+    <div class="section-body" id="body-sec3">
+      <div class="q-box">
+        <div class="q-mark">?</div>
+        <div>
+          <div class="q-text" contenteditable="false" class="editable">¿Cómo influyen los algoritmos de TikTok, YouTube e Instagram en la calidad y la creatividad de los contenidos audiovisuales producidos por creadores de contenido entre 18 y 30 años?</div>
+          <div class="q-delim" contenteditable="false" class="editable">Sujeto de estudio: creadores de contenido audiovisual activos entre 18 y 30 años, con publicación constante en dichas plataformas y alta exposición a dinámicas algorítmicas.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLANTEAMIENTO -->
+  <div class="section" id="sec4">
+    <div class="section-header" onclick="toggle('sec4')">
+      <div class="sec-icon" style="background:var(--coral-50);">⚠️</div>
+      <div>
+        <div class="sec-label" style="color:var(--coral-600);">Sección 4</div>
+        <div class="sec-title">Planteamiento del problema</div>
+      </div>
+      <span class="chevron open" id="chev-sec4">▾</span>
+    </div>
+    <div class="section-body" id="body-sec4">
+      <div class="prose">
+        <p contenteditable="false" class="editable">Las plataformas digitales como TikTok, YouTube e Instagram operan mediante algoritmos que priorizan la interacción, el tiempo de visualización y la viralidad del contenido. Estas dinámicas influyen directamente en los creadores, quienes adaptan sus producciones a las exigencias del sistema para lograr mayor visibilidad.</p>
+        <p contenteditable="false" class="editable">Como consecuencia, se observa una tendencia hacia la repetición de formatos y la reducción de la creatividad, lo que puede afectar la calidad del contenido audiovisual y limitar la diversidad narrativa en los entornos digitales.</p>
+      </div>
+      <div class="info-row">
+        <span class="info-chip">👥 18–30 años</span>
+        <span class="info-chip">🎵 TikTok</span>
+        <span class="info-chip">▶ YouTube</span>
+        <span class="info-chip">📷 Instagram</span>
+        <span class="info-chip">📊 Enfoque cualitativo</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- JUSTIFICACIÓN -->
+  <div class="section" id="sec5">
+    <div class="section-header" onclick="toggle('sec5')">
+      <div class="sec-icon" style="background:var(--pink-50);">❤️</div>
+      <div>
+        <div class="sec-label" style="color:var(--pink-600);">Sección 5</div>
+        <div class="sec-title">Justificación</div>
+      </div>
+      <span class="chevron open" id="chev-sec5">▾</span>
+    </div>
+    <div class="section-body" id="body-sec5">
+      <div class="just-grid">
+        <div class="just-card jc1">
+          <div class="just-icon">👁️</div>
+          <div class="just-title" contenteditable="false" class="editable">Comprensión crítica</div>
+          <div class="just-body" contenteditable="false" class="editable">Permite comprender el impacto real de los algoritmos en la producción audiovisual contemporánea.</div>
+        </div>
+        <div class="just-card jc2">
+          <div class="just-icon">🛠️</div>
+          <div class="just-title" contenteditable="false" class="editable">Herramientas para creadores</div>
+          <div class="just-body" contenteditable="false" class="editable">Aporta recursos para que los creadores desarrollen una postura crítica frente a las plataformas digitales.</div>
+        </div>
+        <div class="just-card jc3">
+          <div class="just-icon">🧠</div>
+          <div class="just-title" contenteditable="false" class="editable">Decisiones conscientes</div>
+          <div class="just-body" contenteditable="false" class="editable">Promueve la toma de decisiones más conscientes e informadas en los procesos creativos.</div>
+        </div>
+        <div class="just-card jc4">
+          <div class="just-icon">🎬</div>
+          <div class="just-title" contenteditable="false" class="editable">Diversidad narrativa</div>
+          <div class="just-body" contenteditable="false" class="editable">Contribuye a preservar la diversidad del lenguaje audiovisual frente a la estandarización algorítmica.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OBJETIVOS -->
+  <div class="section" id="sec6">
+    <div class="section-header" onclick="toggle('sec6')">
+      <div class="sec-icon" style="background:var(--blue-50);">🎯</div>
+      <div>
+        <div class="sec-label" style="color:var(--blue-600);">Sección 6</div>
+        <div class="sec-title">Objetivos del proyecto</div>
+      </div>
+      <span class="chevron open" id="chev-sec6">▾</span>
+    </div>
+    <div class="section-body" id="body-sec6">
+      <div class="obj-list">
+        <div class="obj-gen">
+          <div class="obj-gen-icon">🎯</div>
+          <div>
+            <div class="obj-gen-label">Objetivo general</div>
+            <div class="obj-gen-text" contenteditable="false" class="editable">Analizar la influencia de los algoritmos en la creatividad y la calidad del contenido audiovisual producido por creadores digitales.</div>
+          </div>
+        </div>
+        <div class="obj-esp">
+          <div class="obj-num">1</div>
+          <div class="obj-esp-text" contenteditable="false" class="editable">Identificar el funcionamiento de los algoritmos en plataformas digitales.</div>
+        </div>
+        <div class="obj-esp">
+          <div class="obj-num">2</div>
+          <div class="obj-esp-text" contenteditable="false" class="editable">Analizar la influencia de las métricas en las decisiones creativas de los productores de contenido.</div>
+        </div>
+        <div class="obj-esp">
+          <div class="obj-num">3</div>
+          <div class="obj-esp-text" contenteditable="false" class="editable">Examinar la estandarización del contenido audiovisual en las principales plataformas digitales.</div>
+        </div>
+        <div class="obj-esp">
+          <div class="obj-num">4</div>
+          <div class="obj-esp-text" contenteditable="false" class="editable">Interpretar la percepción de los creadores frente al algoritmo y su impacto en su proceso creativo.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Politécnico Colombiano Jaime Isaza Cadavid · Comunicación Audiovisual · 2026-1
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  var editMode = false;
+  var backup = {};
+
+  function toggle(id) {
+    var body = document.getElementById('body-' + id);
+    var chev = document.getElementById('chev-' + id);
+    var open = body.style.display !== 'none';
+    body.style.display = open ? 'none' : 'block';
+    chev.classList.toggle('open', !open);
+  }
+
+  function startEdit() {
+    editMode = true;
+    backup = {};
+    var fields = document.querySelectorAll('.editable');
+    fields.forEach(function(el, i) {
+      backup[i] = el.innerHTML;
+      el.setAttribute('contenteditable', 'true');
+    });
+    document.querySelector('.page').classList.add('editing');
+    document.querySelector('.btn-edit').style.display = 'none';
+    document.querySelector('.btn-save').style.display = 'inline-block';
+    document.querySelector('.btn-cancel').style.display = 'inline-block';
+    showToast('✏️ Modo edición activado — haz clic en cualquier texto para editarlo');
+    // Open all sections
+    ['sec1','sec2','sec3','sec4','sec5','sec6'].forEach(function(id) {
+      var body = document.getElementById('body-' + id);
+      var chev = document.getElementById('chev-' + id);
+      body.style.display = 'block';
+      chev.classList.add('open');
+    });
+  }
+
+  function saveEdit() {
+    editMode = false;
+    var fields = document.querySelectorAll('.editable');
+    fields.forEach(function(el) {
+      el.setAttribute('contenteditable', 'false');
+    });
+    document.querySelector('.page').classList.remove('editing');
+    document.querySelector('.btn-edit').style.display = 'inline-block';
+    document.querySelector('.btn-save').style.display = 'none';
+    document.querySelector('.btn-cancel').style.display = 'none';
+    showToast('✅ Cambios guardados correctamente');
+  }
+
+  function cancelEdit() {
+    editMode = false;
+    var fields = document.querySelectorAll('.editable');
+    fields.forEach(function(el, i) {
+      if (backup[i] !== undefined) el.innerHTML = backup[i];
+      el.setAttribute('contenteditable', 'false');
+    });
+    document.querySelector('.page').classList.remove('editing');
+    document.querySelector('.btn-edit').style.display = 'inline-block';
+    document.querySelector('.btn-save').style.display = 'none';
+    document.querySelector('.btn-cancel').style.display = 'none';
+    showToast('↩️ Edición cancelada — se restauró el contenido original');
+  }
+
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function() { t.classList.remove('show'); }, 3000);
+  }
+</script>
+</body>
+</html>
